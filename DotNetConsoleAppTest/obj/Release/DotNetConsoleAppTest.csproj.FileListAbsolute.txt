@@ -1,0 +1,9 @@
+G:\Github\DotNetConsoleAppTest\DotNetConsoleAppTest\bin\Release\chromedriver.exe
+G:\Github\DotNetConsoleAppTest\DotNetConsoleAppTest\bin\Release\DotNetConsoleAppTest.exe.config
+G:\Github\DotNetConsoleAppTest\DotNetConsoleAppTest\bin\Release\DotNetConsoleAppTest.exe
+G:\Github\DotNetConsoleAppTest\DotNetConsoleAppTest\bin\Release\DotNetConsoleAppTest.pdb
+G:\Github\DotNetConsoleAppTest\DotNetConsoleAppTest\bin\Release\WebDriver.dll
+G:\Github\DotNetConsoleAppTest\DotNetConsoleAppTest\obj\Release\DotNetConsoleAppTest.csproj.CoreCompileInputs.cache
+G:\Github\DotNetConsoleAppTest\DotNetConsoleAppTest\obj\Release\DotNetConsoleAppTest.csproj.CopyComplete
+G:\Github\DotNetConsoleAppTest\DotNetConsoleAppTest\obj\Release\DotNetConsoleAppTest.exe
+G:\Github\DotNetConsoleAppTest\DotNetConsoleAppTest\obj\Release\DotNetConsoleAppTest.pdb
