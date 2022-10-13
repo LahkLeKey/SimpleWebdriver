@@ -12,6 +12,15 @@
 
     /// <summary>
     /// The program.
+    /// ----------------------------
+    ///           Metrics           |
+    /// ----------------------------
+    /// Maintainability Index: 70
+    /// Cyclomatic Complexity: 16
+    /// Depth of Inheritance: 1
+    /// Class Coupling: 19
+    /// Lines of Source code: 218
+    /// Lines of Executable code: 65
     /// </summary>
     internal class Program
     {
