@@ -52,31 +52,85 @@
             Print(
                 $"Error handling has not been implemented for this program.\nThis has been done as a quick and dirty refresher for both C# and Selenium.\n");
 
-            var driverExecutablePath = DriverExecutablePath();
+            var driver = WebDriver(out var alpha2Codes);
 
-            var options = new ChromeOptions();
-            options.AddArgument("--kiosk"); // Start in fullscreen since we don't care about mobile support for now.
-            options.AddArgument("--log-level=3"); // Silence driver logging.
-            IWebDriver driver = new ChromeDriver(driverExecutablePath, options);
-            driver.Url = "https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes";
-            Print($"Driver Object : {driver}");
+            var validGeoCodes = ValidGeoCodes(alpha2Codes);
 
-            var xPathSelector = By.XPath("//a[@title='ISO 3166-1 alpha-2']");
-            Print($"Parsing DOM for target elements please wait...");
-            IReadOnlyCollection<IWebElement> alpha2Codes = driver.FindElements(xPathSelector);
+            var userInputGeoCode = UserInputGeoCode(validGeoCodes);
 
-            Print($"Parsing targeted elements please wait...");
-            var validGeoCodes = (from eGeoCode in alpha2Codes where eGeoCode.Text.Length == 2 select eGeoCode.Text)
-                .ToList();
+            var userInputCustomSearch = UserInputCustomSearch(driver, userInputGeoCode);
+            InputSelector(driver, userInputCustomSearch);
 
-            if (validGeoCodes.Count != 249)
-            {
-                Print(
-                    $"Warning, Something went wrong when parsing geo codes. We should have 249 total and we have {validGeoCodes.Count}");
-            }
+            Pause();
+        }
 
-            Print($"({validGeoCodes.Count} / 249) alpha-2 geo codes have been parsed.");
+        /// <summary>
+        /// The pause utility.
+        /// </summary>
+        private static void Pause()
+        {
+            Print("This concludes the Selenium test application.");
 
+            // Stop console from closing automatically
+            Console.WriteLine("Press any key to exit.");
+            Console.ReadKey();
+        }
+
+        /// <summary>
+        /// The input selector.
+        /// </summary>
+        /// <param name="driver">
+        /// The driver.
+        /// </param>
+        /// <param name="userInputCustomSearch">
+        /// The user input custom search.
+        /// </param>
+        private static void InputSelector(IWebDriver driver, string userInputCustomSearch)
+        {
+            var inputSelector = By.XPath("//input[@placeholder=\"Enter a search term or a topic\"]");
+            var searchInput = driver.FindElement(inputSelector);
+            searchInput.Click();
+            searchInput.SendKeys($"{userInputCustomSearch}{Keys.Return}");
+        }
+
+        /// <summary>
+        /// The user input custom search.
+        /// </summary>
+        /// <param name="driver">
+        /// The driver.
+        /// </param>
+        /// <param name="userInputGeoCode">
+        /// The user input geo code.
+        /// </param>
+        /// <returns>
+        /// The <see cref="string"/>.
+        /// </returns>
+        private static string UserInputCustomSearch(IWebDriver driver, string userInputGeoCode)
+        {
+            driver.Url = $"https://trends.google.com/trends/?geo={userInputGeoCode}";
+
+            var topicSelector = By.ClassName("fe-explore-example-legend-text");
+            IReadOnlyCollection<IWebElement> popularTopics = driver.FindElements(topicSelector);
+
+            Print($"[{userInputGeoCode}] #1 Trending is {popularTopics.ElementAt(0).Text}");
+            Print($"[{userInputGeoCode}] #2 Trending is {popularTopics.ElementAt(1).Text}");
+
+            Print("Please enter a custom search parameter. eg.) Music");
+            var userInputCustomSearch = Console.ReadLine();
+            return userInputCustomSearch;
+        }
+
+        /// <summary>
+        /// The user input geo code.
+        /// </summary>
+        /// <param name="validGeoCodes">
+        /// The valid geo codes.
+        /// </param>
+        /// <returns>
+        /// The <see cref="string"/>.
+        /// </returns>
+        private static string UserInputGeoCode(List<string> validGeoCodes)
+        {
             Print(
                 "Please enter your 2 digit geo code. eg.) US\n\tYou may also just hit enter and we will default your geo code to US");
             var userInputGeoCode = Console.ReadLine();
@@ -95,27 +149,57 @@
                 userInputGeoCode = "US";
             }
 
-            driver.Url = $"https://trends.google.com/trends/?geo={userInputGeoCode}";
+            return userInputGeoCode;
+        }
 
-            var topicSelector = By.ClassName("fe-explore-example-legend-text");
-            IReadOnlyCollection<IWebElement> popularTopics = driver.FindElements(topicSelector);
+        /// <summary>
+        /// The valid geo codes.
+        /// </summary>
+        /// <param name="alpha2Codes">
+        /// The alpha 2 codes.
+        /// </param>
+        /// <returns>
+        /// The <see cref="List"/>.
+        /// </returns>
+        private static List<string> ValidGeoCodes(IReadOnlyCollection<IWebElement> alpha2Codes)
+        {
+            Print($"Parsing targeted elements please wait...");
+            var validGeoCodes = (from eGeoCode in alpha2Codes where eGeoCode.Text.Length == 2 select eGeoCode.Text).ToList();
 
-            Print($"[{userInputGeoCode}] #1 Trending is {popularTopics.ElementAt(0).Text}");
-            Print($"[{userInputGeoCode}] #2 Trending is {popularTopics.ElementAt(1).Text}");
+            if (validGeoCodes.Count != 249)
+            {
+                Print(
+                    $"Warning, Something went wrong when parsing geo codes. We should have 249 total and we have {validGeoCodes.Count}");
+            }
 
-            Print("Please enter a custom search parameter. eg.) Music");
-            var userInputCustomSearch = Console.ReadLine();
+            Print($"({validGeoCodes.Count} / 249) alpha-2 geo codes have been parsed.");
+            return validGeoCodes;
+        }
 
-            var inputSelector = By.XPath("//input[@placeholder=\"Enter a search term or a topic\"]");
-            var searchInput = driver.FindElement(inputSelector);
-            searchInput.Click();
-            searchInput.SendKeys($"{userInputCustomSearch}{Keys.Return}");
+        /// <summary>
+        /// The web driver.
+        /// </summary>
+        /// <param name="alpha2Codes">
+        /// The alpha 2 codes.
+        /// </param>
+        /// <returns>
+        /// The <see cref="IWebDriver"/>.
+        /// </returns>
+        private static IWebDriver WebDriver(out IReadOnlyCollection<IWebElement> alpha2Codes)
+        {
+            var driverExecutablePath = DriverExecutablePath();
 
-            Print("This concludes the Selenium test application.");
+            var options = new ChromeOptions();
+            options.AddArgument("--kiosk"); // Start in fullscreen since we don't care about mobile support for now.
+            options.AddArgument("--log-level=3"); // Silence driver logging.
+            IWebDriver driver = new ChromeDriver(driverExecutablePath, options);
+            driver.Url = "https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes";
+            Print($"Driver Object : {driver}");
 
-            // Stop console from closing automatically
-            Console.WriteLine("Press any key to exit.");
-            Console.ReadKey();
+            var xPathSelector = By.XPath("//a[@title='ISO 3166-1 alpha-2']");
+            Print($"Parsing DOM for target elements please wait...");
+            alpha2Codes = driver.FindElements(xPathSelector);
+            return driver;
         }
 
         /// <summary>
